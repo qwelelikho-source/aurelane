@@ -1,0 +1,70 @@
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import { z } from 'zod';
+import bcrypt from 'bcrypt';
+import { prisma } from './prisma';
+
+const config = {
+  providers: [
+    Credentials({
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      authorize: async (credentials) => {
+        const parsedCredentials = z
+          .object({ email: z.string().email(), password: z.string().min(6) })
+          .safeParse(credentials);
+
+        if (!parsedCredentials.success) {
+          return null;
+        }
+
+        const { email, password } = parsedCredentials.data;
+
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (!user) {
+          return null;
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+
+        if (!passwordMatch) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        };
+      },
+    }),
+  ],
+  session: {
+    strategy: 'jwt',
+  },
+  pages: {
+    signIn: '/login',
+  },
+  callbacks: {
+    async jwt({ token, user }: any) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }: any) {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
+};
+
+// @ts-expect-error - next-auth beta has type issues
+export const { handlers, signIn, signOut, auth } = NextAuth(config);
