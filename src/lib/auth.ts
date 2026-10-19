@@ -10,6 +10,7 @@ if (typeof window !== 'undefined') {
 }
 
 const config = {
+  secret: process.env.AUTH_SECRET || 'dev-secret-change-in-production',
   providers: [
     Credentials({
       credentials: {
