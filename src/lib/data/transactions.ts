@@ -1,6 +1,11 @@
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
+// This file is server-only
+if (typeof window !== 'undefined') {
+  throw new Error('This module can only be used on the server');
+}
+
 const transactionSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE']),
   amountCents: z.number().int().positive(),

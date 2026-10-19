@@ -1,6 +1,11 @@
 import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+
+// This file is server-only
+if (typeof window !== 'undefined') {
+  throw new Error('This module can only be used on the server');
+}
 
 const registerSchema = z.object({
   email: z.string().email(),

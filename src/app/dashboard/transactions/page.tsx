@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { formatZAR } from '@/lib/money';
-import { auth } from '@/lib/auth';
 
 interface Transaction {
   id: string;
@@ -29,9 +28,6 @@ export default function TransactionsPage() {
 
   const fetchTransactions = async () => {
     try {
-      const session = await auth();
-      if (!session?.user) return;
-
       const response = await fetch('/api/transactions');
       if (!response.ok) throw new Error('Failed to fetch transactions');
       const data = await response.json();

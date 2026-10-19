@@ -1,8 +1,13 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
+
+// This file is server-only
+if (typeof window !== 'undefined') {
+  throw new Error('This module can only be used on the server');
+}
 
 const config = {
   providers: [
@@ -67,4 +72,4 @@ const config = {
 };
 
 // @ts-expect-error - next-auth beta has type issues
-export const { handlers, signIn, signOut, auth } = NextAuth(config);
+export const { handlers, auth } = NextAuth(config);
