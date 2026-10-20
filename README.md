@@ -11,10 +11,10 @@ Aurelane is a personal finance tracker built for South African rand (ZAR). Track
 - **PostgreSQL** (Neon) for the database
 - **Prisma** as the ORM
 - **Zod** for runtime validation
-- **Auth.js** (credentials provider) with bcrypt for password hashing
+- **Auth.js** (credentials provider) with bcryptjs for password hashing
 - **Vitest** for testing
 
-## Setup
+## Local Setup
 
 ### Prerequisites
 
@@ -38,30 +38,34 @@ pnpm install
 
 3. Set up environment variables:
 
-Create a `.env` file in the root directory with the following variables:
+Copy the example environment file:
 
-```env
-DATABASE_URL="postgresql://user:password@host:port/database?pgbouncer=true"
-DIRECT_URL="postgresql://user:password@host:port/database"
-AUTH_SECRET="your-auth-secret-here"
+**PowerShell:**
+```powershell
+Copy-Item .env.example .env
 ```
 
-You can generate an `AUTH_SECRET` using:
-
+**Bash:**
 ```bash
-openssl rand -base64 32
+cp .env.example .env
 ```
+
+Then fill in the values in `.env`:
+
+- **DATABASE_URL**: Get from Neon dashboard → Project Settings → Connection Details → **Pooled** connection string
+- **DIRECT_URL**: Get from Neon dashboard → Project Settings → Connection Details → **Direct** connection string
+- **AUTH_SECRET**: Generate with `npx auth secret` or `openssl rand -base64 32`
 
 4. Run database migrations:
 
 ```bash
-pnpm prisma migrate dev
+pnpm prisma migrate deploy
 ```
 
-5. (Optional) Seed the database with sample data:
+5. Seed the database with sample data:
 
 ```bash
-pnpm prisma:seed
+pnpm prisma db seed
 ```
 
 This creates a demo user with email `demo@aurelane.com` and password `demo123`, along with sample transactions, budgets, and savings goals. Note: All amounts are SAMPLE FIGURES for demonstration purposes only.

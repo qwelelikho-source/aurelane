@@ -3,6 +3,7 @@ import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { prisma } from './prisma';
+import { env } from './env';
 
 // This file is server-only
 if (typeof window !== 'undefined') {
@@ -10,7 +11,7 @@ if (typeof window !== 'undefined') {
 }
 
 const config = {
-  secret: process.env.AUTH_SECRET || 'dev-secret-change-in-production',
+  secret: env.AUTH_SECRET,
   providers: [
     Credentials({
       credentials: {
