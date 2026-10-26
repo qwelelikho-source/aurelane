@@ -11,8 +11,8 @@ export async function GET() {
 
     const transactions = await getTransactions(session.user.id);
     return NextResponse.json(transactions);
-  } catch (error) {
-    console.error('Error fetching transactions:', error);
+  } catch {
+    console.error('[TX_FETCH_ERROR]', { code: 'TX_FETCH_FAILED' });
     return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 });
   }
 }
@@ -25,11 +25,19 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const transaction = await createTransaction(session.user.id, body);
+    const result = await createTransaction(session.user.id, body);
 
-    return NextResponse.json(transaction, { status: 201 });
-  } catch (error) {
-    console.error('Error creating transaction:', error);
+    if (result.error === 'VALIDATION') {
+      return NextResponse.json(result, { status: 400 });
+    }
+
+    if (result.error === 'SERVER_ERROR') {
+      return NextResponse.json(result, { status: 500 });
+    }
+
+    return NextResponse.json(result.transaction, { status: 201 });
+  } catch {
+    console.error('[TX_CREATE_ERROR]', { code: 'TX_CREATE_UNEXPECTED' });
     return NextResponse.json({ error: 'Failed to create transaction' }, { status: 500 });
   }
 }

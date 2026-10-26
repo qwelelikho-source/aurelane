@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { parseRandToCents } from '@/lib/money';
 
 // This file is server-only
 if (typeof window !== 'undefined') {
@@ -8,21 +9,83 @@ if (typeof window !== 'undefined') {
 
 const transactionSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE']),
-  amountCents: z.number().int().positive(),
-  category: z.string().min(1),
-  description: z.string().optional(),
-  date: z.date(),
+  amount: z.string().min(1).refine((val) => {
+    try {
+      parseRandToCents(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }, { message: 'Invalid amount format' }), // Will be converted to cents
+  category: z.string().min(1).max(50).trim(),
+  description: z.string().max(200).trim().nullable().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD format
 });
 
 export async function createTransaction(userId: string, data: unknown) {
-  const parsed = transactionSchema.parse(data);
+  const parsed = transactionSchema.safeParse(data);
 
-  return prisma.transaction.create({
-    data: {
-      ...parsed,
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    parsed.error.issues.forEach((issue) => {
+      const field = issue.path[0] as string;
+      fieldErrors[field] = issue.message;
+    });
+
+    return {
+      error: 'VALIDATION',
+      fields: fieldErrors,
+    };
+  }
+
+  const { type, amount, category, description, date } = parsed.data;
+
+  // Convert amount from rand string to cents
+  const amountCents = parseRandToCents(amount);
+
+  // Convert date string to Date object
+  const transactionDate = new Date(date);
+
+  // Validate date is not absurdly far in past or future
+  const minDate = new Date('2000-01-01');
+  const maxDate = new Date('2100-12-31');
+
+  if (transactionDate < minDate || transactionDate > maxDate) {
+    return {
+      error: 'VALIDATION',
+      fields: {
+        date: 'Date must be between 2000-01-01 and 2100-12-31',
+      },
+    };
+  }
+
+  // Treat empty description as null
+  const finalDescription = description && description.length > 0 ? description : null;
+
+  try {
+    const transaction = await prisma.transaction.create({
+      data: {
+        type,
+        amountCents,
+        category,
+        description: finalDescription,
+        date: transactionDate,
+        userId,
+      },
+    });
+
+    return { transaction };
+  } catch {
+    console.error('[TX_CREATE_ERROR]', {
+      code: 'TX_CREATE_FAILED',
       userId,
-    },
-  });
+      category,
+    });
+    return {
+      error: 'SERVER_ERROR',
+      message: 'Failed to create transaction',
+    };
+  }
 }
 
 export async function getTransactions(userId: string) {

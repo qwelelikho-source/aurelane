@@ -65,27 +65,34 @@ export default function TransactionsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFormErrors({});
 
     if (!validateForm()) return;
 
     startTransition(async () => {
       try {
-        const amountCents = Math.round(Number(formData.amount) * 100);
         const response = await fetch('/api/transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: formData.type,
-            amountCents,
+            amount: formData.amount,
             category: formData.category,
             description: formData.description || null,
-            date: new Date(formData.date).toISOString(),
+            date: formData.date,
           }),
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to add transaction');
+          if (data.error === 'VALIDATION' && data.fields) {
+            setFormErrors(data.fields);
+            setError('Please fix the errors below');
+          } else {
+            setError(data.message || data.error || 'Failed to add transaction');
+          }
+          return;
         }
 
         setFormData({
