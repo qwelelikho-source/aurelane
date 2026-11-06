@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { formatZAR } from '@/lib/money';
 
 interface Transaction {
@@ -17,6 +17,8 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const [formData, setFormData] = useState({
     type: 'EXPENSE' as 'INCOME' | 'EXPENSE',
     amount: '',
@@ -39,9 +41,12 @@ export default function TransactionsPage() {
     }
   };
 
-  useState(() => {
-    fetchTransactions();
-  });
+  useEffect(() => {
+    const load = async () => {
+      await fetchTransactions();
+    };
+    load();
+  }, []);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -104,6 +109,9 @@ export default function TransactionsPage() {
         });
         setFormErrors({});
         await fetchTransactions();
+        setToastMessage('Transaction added successfully');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to add transaction');
       }
@@ -124,44 +132,45 @@ export default function TransactionsPage() {
         }
 
         await fetchTransactions();
+        setToastMessage('Transaction deleted');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
       } catch {
         setError('Failed to delete transaction');
       }
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-slate-400">Loading transactions...</p>
-      </div>
-    );
-  }
-
   return (
     <div>
-      <h1 className="text-3xl font-serif text-white mb-8">Transactions</h1>
+      <h1 className="text-3xl font-serif text-text mb-8">Transactions</h1>
+
+      {showToast && (
+        <div className="fixed top-4 right-4 bg-positive text-background px-4 py-2 rounded shadow-lg z-50">
+          {toastMessage}
+        </div>
+      )}
 
       {error && (
-        <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-6">
+        <div className="bg-negative/10 border border-negative text-negative px-4 py-3 rounded mb-6">
           {error}
         </div>
       )}
 
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-8">
-        <h2 className="text-xl font-serif text-white mb-4">Add Transaction</h2>
+      <div className="bg-surface border border-border rounded-2xl p-6 mb-8">
+        <h2 className="text-xl font-serif text-text mb-4">Add Transaction</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="type" className="block text-sm font-medium text-muted mb-1">
                 Type
               </label>
               <select
                 id="type"
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as 'INCOME' | 'EXPENSE' })}
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                className="w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
               >
                 <option value="EXPENSE">Expense</option>
                 <option value="INCOME">Income</option>
@@ -169,26 +178,25 @@ export default function TransactionsPage() {
             </div>
 
             <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="amount" className="block text-sm font-medium text-muted mb-1">
                 Amount (R)
               </label>
               <input
                 id="amount"
-                type="number"
+                type="text"
                 step="0.01"
-                min="0.01"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className={`w-full px-4 py-2 bg-slate-700 border rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${
-                  formErrors.amount ? 'border-red-500' : 'border-slate-600'
+                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all ${
+                  formErrors.amount ? 'border-negative' : 'border-border'
                 }`}
                 placeholder="0.00"
               />
-              {formErrors.amount && <p className="text-red-400 text-sm mt-1">{formErrors.amount}</p>}
+              {formErrors.amount && <p className="text-negative text-sm mt-1">{formErrors.amount}</p>}
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="category" className="block text-sm font-medium text-muted mb-1">
                 Category
               </label>
               <input
@@ -196,16 +204,16 @@ export default function TransactionsPage() {
                 type="text"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className={`w-full px-4 py-2 bg-slate-700 border rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${
-                  formErrors.category ? 'border-red-500' : 'border-slate-600'
+                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all ${
+                  formErrors.category ? 'border-negative' : 'border-border'
                 }`}
                 placeholder="e.g., Groceries"
               />
-              {formErrors.category && <p className="text-red-400 text-sm mt-1">{formErrors.category}</p>}
+              {formErrors.category && <p className="text-negative text-sm mt-1">{formErrors.category}</p>}
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="date" className="block text-sm font-medium text-muted mb-1">
                 Date
               </label>
               <input
@@ -213,16 +221,16 @@ export default function TransactionsPage() {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className={`w-full px-4 py-2 bg-slate-700 border rounded text-white focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${
-                  formErrors.date ? 'border-red-500' : 'border-slate-600'
+                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all ${
+                  formErrors.date ? 'border-negative' : 'border-border'
                 }`}
               />
-              {formErrors.date && <p className="text-red-400 text-sm mt-1">{formErrors.date}</p>}
+              {formErrors.date && <p className="text-negative text-sm mt-1">{formErrors.date}</p>}
             </div>
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-muted mb-1">
               Description (optional)
             </label>
             <input
@@ -230,7 +238,7 @@ export default function TransactionsPage() {
               type="text"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+              className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
               placeholder="e.g., Weekly grocery shopping"
             />
           </div>
@@ -238,38 +246,49 @@ export default function TransactionsPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-medium py-2 px-6 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-10 bg-gold hover:bg-gold/90 text-background font-medium px-6 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? 'Adding...' : 'Add Transaction'}
           </button>
         </form>
       </div>
 
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <h2 className="text-xl font-serif text-white mb-4">All Transactions</h2>
+      <div className="bg-surface border border-border rounded-2xl p-6">
+        <h2 className="text-xl font-serif text-text mb-4">All Transactions</h2>
 
-        {transactions.length === 0 ? (
-          <p className="text-slate-400">No transactions yet. Add your first transaction above.</p>
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-background rounded animate-pulse" />
+            ))}
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted mb-4">No transactions yet.</p>
+            <p className="text-sm text-muted">
+              Add your first transaction using the form above.
+            </p>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-border">
             {transactions.map((transaction) => (
               <div
                 key={transaction.id}
-                className="flex items-center justify-between py-3 border-b border-slate-700 last:border-0"
+                className="flex items-center justify-between py-4"
               >
                 <div className="flex-1">
-                  <p className="text-white font-medium">{transaction.category}</p>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-text font-medium">{transaction.category}</p>
+                  <p className="text-sm text-muted">
                     {transaction.description || 'No description'}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted">
                     {new Date(transaction.date).toLocaleDateString('en-ZA')}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <p
                     className={`text-lg font-medium tabular-nums ${
-                      transaction.type === 'INCOME' ? 'text-green-400' : 'text-red-400'
+                      transaction.type === 'INCOME' ? 'text-positive' : 'text-negative'
                     }`}
                   >
                     {transaction.type === 'INCOME' ? '+' : '-'}
@@ -277,7 +296,7 @@ export default function TransactionsPage() {
                   </p>
                   <button
                     onClick={() => handleDelete(transaction.id)}
-                    className="text-slate-400 hover:text-red-400 transition-colors"
+                    className="text-muted hover:text-negative transition-colors disabled:opacity-50"
                     disabled={isPending}
                   >
                     Delete

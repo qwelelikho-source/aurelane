@@ -47,25 +47,25 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-serif text-amber-400 mb-2">Aurelane</h1>
-          <p className="text-slate-400">Private money tracking, in rand.</p>
+          <h1 className="text-4xl font-serif text-gold mb-2">Aurelane</h1>
+          <p className="text-muted">Private money tracking, in rand.</p>
         </div>
 
-        <div className="bg-slate-800 rounded-lg p-8 shadow-xl">
-          <h2 className="text-2xl font-serif text-white mb-6">Create Account</h2>
+        <div className="bg-surface border border-border rounded-2xl p-8">
+          <h2 className="text-2xl font-serif text-text mb-6">Create Account</h2>
 
           {error && (
-            <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-4">
+            <div className="bg-negative/10 border border-negative text-negative px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
 
           <form action={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-muted mb-1">
                 Name
               </label>
               <input
@@ -73,13 +73,13 @@ export default function RegisterPage() {
                 name="name"
                 type="text"
                 required
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                 placeholder="Your name"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-muted mb-1">
                 Email
               </label>
               <input
@@ -87,13 +87,13 @@ export default function RegisterPage() {
                 name="email"
                 type="email"
                 required
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-muted mb-1">
                 Password
               </label>
               <input
@@ -102,13 +102,13 @@ export default function RegisterPage() {
                 type="password"
                 required
                 minLength={6}
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                 placeholder="Minimum 6 characters"
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-muted mb-1">
                 Confirm Password
               </label>
               <input
@@ -117,7 +117,7 @@ export default function RegisterPage() {
                 type="password"
                 required
                 minLength={6}
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                 placeholder="Confirm your password"
               />
             </div>
@@ -125,15 +125,15 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-medium py-2 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-10 bg-gold hover:bg-gold/90 text-background font-medium px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-slate-400">
+          <p className="mt-6 text-center text-muted">
             Already have an account?{' '}
-            <Link href="/login" className="text-amber-400 hover:text-amber-300">
+            <Link href="/login" className="text-gold hover:text-gold/80">
               Sign in
             </Link>
           </p>

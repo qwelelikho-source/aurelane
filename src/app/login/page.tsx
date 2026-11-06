@@ -35,31 +35,31 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-serif text-amber-400 mb-2">Aurelane</h1>
-          <p className="text-slate-400">Private money tracking, in rand.</p>
+          <h1 className="text-4xl font-serif text-gold mb-2">Aurelane</h1>
+          <p className="text-muted">Private money tracking, in rand.</p>
         </div>
 
-        <div className="bg-slate-800 rounded-lg p-8 shadow-xl">
-          <h2 className="text-2xl font-serif text-white mb-6">Sign In</h2>
+        <div className="bg-surface border border-border rounded-2xl p-8">
+          <h2 className="text-2xl font-serif text-text mb-6">Sign In</h2>
 
           {registered && (
-            <div className="bg-green-900/50 border border-green-700 text-green-200 px-4 py-3 rounded mb-4">
+            <div className="bg-positive/10 border border-positive text-positive px-4 py-3 rounded mb-4">
               Account created successfully! Please sign in.
             </div>
           )}
 
           {error && (
-            <div className="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-4">
+            <div className="bg-negative/10 border border-negative text-negative px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
 
           <form action={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-muted mb-1">
                 Email
               </label>
               <input
@@ -67,13 +67,13 @@ function LoginForm() {
                 name="email"
                 type="email"
                 required
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-muted mb-1">
                 Password
               </label>
               <input
@@ -81,7 +81,7 @@ function LoginForm() {
                 name="password"
                 type="password"
                 required
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
                 placeholder="Your password"
               />
             </div>
@@ -89,15 +89,15 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-medium py-2 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-10 bg-gold hover:bg-gold/90 text-background font-medium px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-slate-400">
+          <p className="mt-6 text-center text-muted">
             Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-amber-400 hover:text-amber-300">
+            <Link href="/register" className="text-gold hover:text-gold/80">
               Create one
             </Link>
           </p>
@@ -109,7 +109,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-900 px-4"><p className="text-slate-400">Loading...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background px-4"><p className="text-muted">Loading...</p></div>}>
       <LoginForm />
     </Suspense>
   );
