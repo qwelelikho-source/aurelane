@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import { formatZAR } from '@/lib/money';
+import { Trash2 } from 'lucide-react';
 
 interface Transaction {
   id: string;
@@ -142,7 +143,7 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto">
       <h1 className="text-3xl font-serif text-text mb-8">Transactions</h1>
 
       {showToast && (
@@ -163,14 +164,14 @@ export default function TransactionsPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-muted mb-1">
+              <label htmlFor="type" className="block text-sm font-medium text-muted mb-1 text-[14px]">
                 Type
               </label>
               <select
                 id="type"
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as 'INCOME' | 'EXPENSE' })}
-                className="w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+                className="w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px]"
               >
                 <option value="EXPENSE">Expense</option>
                 <option value="INCOME">Income</option>
@@ -178,7 +179,7 @@ export default function TransactionsPage() {
             </div>
 
             <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-muted mb-1">
+              <label htmlFor="amount" className="block text-sm font-medium text-muted mb-1 text-[14px]">
                 Amount (R)
               </label>
               <input
@@ -187,16 +188,16 @@ export default function TransactionsPage() {
                 step="0.01"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all ${
+                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px] ${
                   formErrors.amount ? 'border-negative' : 'border-border'
                 }`}
                 placeholder="0.00"
               />
-              {formErrors.amount && <p className="text-negative text-sm mt-1">{formErrors.amount}</p>}
+              {formErrors.amount && <p className="text-negative text-sm mt-1 text-[13px]">{formErrors.amount}</p>}
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-muted mb-1">
+              <label htmlFor="category" className="block text-sm font-medium text-muted mb-1 text-[14px]">
                 Category
               </label>
               <input
@@ -204,16 +205,16 @@ export default function TransactionsPage() {
                 type="text"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all ${
+                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px] ${
                   formErrors.category ? 'border-negative' : 'border-border'
                 }`}
                 placeholder="e.g., Groceries"
               />
-              {formErrors.category && <p className="text-negative text-sm mt-1">{formErrors.category}</p>}
+              {formErrors.category && <p className="text-negative text-sm mt-1 text-[13px]">{formErrors.category}</p>}
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-muted mb-1">
+              <label htmlFor="date" className="block text-sm font-medium text-muted mb-1 text-[14px]">
                 Date
               </label>
               <input
@@ -221,16 +222,16 @@ export default function TransactionsPage() {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all ${
+                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px] ${
                   formErrors.date ? 'border-negative' : 'border-border'
                 }`}
               />
-              {formErrors.date && <p className="text-negative text-sm mt-1">{formErrors.date}</p>}
+              {formErrors.date && <p className="text-negative text-sm mt-1 text-[13px]">{formErrors.date}</p>}
             </div>
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-muted mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-muted mb-1 text-[14px]">
               Description (optional)
             </label>
             <input
@@ -238,7 +239,7 @@ export default function TransactionsPage() {
               type="text"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
+              className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px]"
               placeholder="e.g., Weekly grocery shopping"
             />
           </div>
@@ -246,7 +247,7 @@ export default function TransactionsPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="h-10 bg-gold hover:bg-gold/90 text-background font-medium px-6 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-10 bg-gold hover:bg-gold/90 text-background font-medium px-6 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
           >
             {isPending ? 'Adding...' : 'Add Transaction'}
           </button>
@@ -264,8 +265,8 @@ export default function TransactionsPage() {
           </div>
         ) : transactions.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted mb-4">No transactions yet.</p>
-            <p className="text-sm text-muted">
+            <p className="text-muted mb-4 text-[14px]">No transactions yet.</p>
+            <p className="text-sm text-muted text-[13px]">
               Add your first transaction using the form above.
             </p>
           </div>
@@ -277,18 +278,22 @@ export default function TransactionsPage() {
                 className="flex items-center justify-between py-4"
               >
                 <div className="flex-1">
-                  <p className="text-text font-medium">{transaction.category}</p>
-                  <p className="text-sm text-muted">
+                  <p className="text-text font-medium text-[14px]">{transaction.category}</p>
+                  <p className="text-sm text-muted text-[13px]">
                     {transaction.description || 'No description'}
                   </p>
-                  <p className="text-xs text-muted">
+                  <p className="text-xs text-muted text-[13px]">
                     {new Date(transaction.date).toLocaleDateString('en-ZA')}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <p
                     className={`text-lg font-medium tabular-nums ${
-                      transaction.type === 'INCOME' ? 'text-positive' : 'text-negative'
+                      transaction.type === 'INCOME' && transaction.amountCents > 0
+                        ? 'text-positive'
+                        : transaction.type === 'EXPENSE' && transaction.amountCents > 0
+                        ? 'text-negative'
+                        : 'text-text'
                     }`}
                   >
                     {transaction.type === 'INCOME' ? '+' : '-'}
@@ -298,8 +303,9 @@ export default function TransactionsPage() {
                     onClick={() => handleDelete(transaction.id)}
                     className="text-muted hover:text-negative transition-colors disabled:opacity-50"
                     disabled={isPending}
+                    aria-label="Delete transaction"
                   >
-                    Delete
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>

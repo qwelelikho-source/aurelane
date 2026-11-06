@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import { LayoutDashboard, CreditCard, ClipboardList, Target, LogOut } from 'lucide-react';
 
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: '📊' },
-  { name: 'Transactions', href: '/dashboard/transactions', icon: '💳' },
-  { name: 'Budgets', href: '/dashboard/budgets', icon: '📋' },
-  { name: 'Goals', href: '/dashboard/goals', icon: '🎯' },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Transactions', href: '/dashboard/transactions', icon: CreditCard },
+  { name: 'Budgets', href: '/dashboard/budgets', icon: ClipboardList },
+  { name: 'Goals', href: '/dashboard/goals', icon: Target },
 ];
 
 export default function Sidebar() {
@@ -21,28 +22,29 @@ export default function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-16 bg-surface min-h-screen border-r border-border">
-        <div className="p-4">
-          <h1 className="text-2xl font-serif text-gold">A</h1>
+      <aside className="hidden md:flex flex-col w-56 bg-surface min-h-screen border-r border-border">
+        <div className="p-6">
+          <h1 className="text-2xl font-serif text-gold">Aurelane</h1>
         </div>
 
         <nav className="flex-1 py-4">
           <ul className="space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
+              const Icon = item.icon;
               return (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={`flex items-center justify-center px-4 py-3 rounded-l border-l-2 transition-all ${
+                    className={`flex items-center gap-3 px-6 py-3 rounded-l border-l-2 transition-all ${
                       isActive
-                        ? 'bg-background/50 border-gold text-text'
+                        ? 'bg-background/50 border-gold text-gold'
                         : 'border-transparent text-muted hover:text-text hover:bg-background/30'
                     }`}
-                    title={item.name}
+                    aria-label={item.name}
                   >
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="sr-only">{item.name}</span>
+                    <Icon className="w-5 h-5" />
+                    <span className="text-[14px]">{item.name}</span>
                   </Link>
                 </li>
               );
@@ -50,16 +52,14 @@ export default function Sidebar() {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-border">
+        <div className="p-6 border-t border-border">
           <button
             onClick={handleSignOut}
-            className="flex items-center justify-center w-full px-4 py-3 text-muted hover:text-text transition-colors"
-            title="Sign Out"
+            className="flex items-center gap-3 w-full px-6 py-3 text-muted hover:text-text transition-colors"
+            aria-label="Sign Out"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012 2h2" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 3.5a2.5 2.5 0 0 1 0 5 0 2.5 2.5 0 0 1 0 5 0 2.5 2.5 0 0 1 0 5 0 2.5 2.5 0 0 1 0 5 0" />
-            </svg>
+            <LogOut className="w-5 h-5" />
+            <span className="text-[14px]">Sign Out</span>
           </button>
         </div>
       </aside>
@@ -69,6 +69,7 @@ export default function Sidebar() {
         <nav className="flex justify-around py-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
+            const Icon = item.icon;
             return (
               <Link
                 key={item.href}
@@ -76,8 +77,9 @@ export default function Sidebar() {
                 className={`flex flex-col items-center px-4 py-2 text-sm transition-colors ${
                   isActive ? 'text-gold' : 'text-muted'
                 }`}
+                aria-label={item.name}
               >
-                <span className="text-2xl mb-1">{item.icon}</span>
+                <Icon className={`w-6 h-6 mb-1 ${isActive ? 'text-gold' : 'text-muted'}`} />
                 <span className="text-xs">{item.name}</span>
               </Link>
             );
