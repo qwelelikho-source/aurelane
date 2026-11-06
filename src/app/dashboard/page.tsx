@@ -2,8 +2,6 @@ import { auth } from '@/lib/auth';
 import { getMonthlyTotals, getRecentTransactions } from '@/lib/data/transactions';
 import { formatZAR } from '@/lib/money';
 
-export const instant = false;
-
 export default async function DashboardPage() {
   const session = await auth();
   const userId = session?.user?.id;
