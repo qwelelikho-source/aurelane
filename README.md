@@ -92,12 +92,23 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Features
 
+### Core Features
 - **Authentication**: Secure registration and login with bcrypt-hashed passwords
-- **Dashboard**: View total income, expenses, and remaining budget for the current month
-- **Transactions**: Add, view, and delete income and expense transactions
+- **Dashboard**: View total income, expenses, and remaining budget for the current month with a hero display and progress bar
+- **Transactions**: Add, view, edit, and delete income and expense transactions with inline validation
 - **Data Security**: All database operations are scoped by user ID - users can only access their own data
 - **South African Rand**: Full ZAR support with proper formatting (R 1 234,56)
-- **Responsive Design**: Works on desktop and mobile devices
+- **Responsive Design**: Works on desktop and mobile devices with a mobile bottom navigation bar
+
+### Week 2 Features
+- **Budgets**: Create, edit, and delete monthly spending limits per category with visual progress bars showing spent vs limit
+- **Savings Goals**: Create, edit, and delete savings goals with progress tracking, target dates, and contribution functionality
+- **Charts**: Visual spending patterns with Recharts:
+  - Spending by category (horizontal bar chart)
+  - Income vs expenses by month (last 6 months)
+  - Accessible data tables as text alternatives
+- **Filters**: URL-based filtering by month, custom date range, category, and transaction type
+- **CSV Export**: Export transactions to CSV with proper escaping, formula injection guard, and UTF-8 BOM for Excel compatibility
 
 ## Security
 
@@ -112,6 +123,7 @@ The project includes unit tests for:
 
 - Money parsing and formatting utilities
 - Monthly totals calculation
+- Transaction creation validation
 - Ownership security (proving users cannot access other users' data)
 
 Run tests with:

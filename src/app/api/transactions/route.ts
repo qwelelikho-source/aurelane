@@ -1,15 +1,25 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { createTransaction, getTransactions } from '@/lib/data/transactions';
+import { parseFilters, getDateRangeFromFilters } from '@/lib/filters';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const transactions = await getTransactions(session.user.id);
+    const url = new URL(request.url);
+    const filters = parseFilters(url.searchParams);
+    const dateRange = getDateRangeFromFilters(filters);
+
+    const transactions = await getTransactions(session.user.id, {
+      start: dateRange?.start,
+      end: dateRange?.end,
+      category: filters.category,
+      type: filters.type,
+    });
     return NextResponse.json(transactions);
   } catch {
     console.error('[TX_FETCH_ERROR]', { code: 'TX_FETCH_FAILED' });

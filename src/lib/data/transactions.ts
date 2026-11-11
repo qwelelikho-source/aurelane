@@ -88,9 +88,26 @@ export async function createTransaction(userId: string, data: unknown) {
   }
 }
 
-export async function getTransactions(userId: string) {
+export async function getTransactions(userId: string, filters?: { start?: Date; end?: Date; category?: string; type?: 'INCOME' | 'EXPENSE' }) {
+  const where: any = { userId };
+
+  if (filters?.start && filters?.end) {
+    where.date = {
+      gte: filters.start,
+      lte: filters.end,
+    };
+  }
+
+  if (filters?.category) {
+    where.category = filters.category;
+  }
+
+  if (filters?.type) {
+    where.type = filters.type;
+  }
+
   return prisma.transaction.findMany({
-    where: { userId },
+    where,
     orderBy: { date: 'desc' },
   });
 }
@@ -101,6 +118,87 @@ export async function getRecentTransactions(userId: string, limit: number = 5) {
     orderBy: { date: 'desc' },
     take: limit,
   });
+}
+
+export async function updateTransaction(userId: string, id: string, data: unknown) {
+  const parsed = transactionSchema.partial().safeParse(data);
+
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    parsed.error.issues.forEach((issue) => {
+      const field = issue.path[0] as string;
+      fieldErrors[field] = issue.message;
+    });
+
+    return {
+      error: 'VALIDATION',
+      fields: fieldErrors,
+    };
+  }
+
+  const { type, amount, category, description, date } = parsed.data;
+
+  // Build update data object
+  const updateData: any = {};
+  if (type) updateData.type = type;
+  if (category) updateData.category = category;
+  if (description !== undefined) {
+    updateData.description = description && description.length > 0 ? description : null;
+  }
+  if (date) {
+    const transactionDate = new Date(date);
+    const minDate = new Date('2000-01-01');
+    const maxDate = new Date('2100-12-31');
+
+    if (transactionDate < minDate || transactionDate > maxDate) {
+      return {
+        error: 'VALIDATION',
+        fields: {
+          date: 'Date must be between 2000-01-01 and 2100-12-31',
+        },
+      };
+    }
+    updateData.date = transactionDate;
+  }
+  if (amount) {
+    updateData.amountCents = parseRandToCents(amount);
+  }
+
+  try {
+    // Check ownership first
+    const existing = await prisma.transaction.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return {
+        error: 'NOT_FOUND',
+      };
+    }
+
+    if (existing.userId !== userId) {
+      return {
+        error: 'FORBIDDEN',
+      };
+    }
+
+    const transaction = await prisma.transaction.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return { transaction };
+  } catch {
+    console.error('[TX_UPDATE_ERROR]', {
+      code: 'TX_UPDATE_FAILED',
+      userId,
+      id,
+    });
+    return {
+      error: 'SERVER_ERROR',
+      message: 'Failed to update transaction',
+    };
+  }
 }
 
 export async function deleteTransaction(userId: string, id: string) {

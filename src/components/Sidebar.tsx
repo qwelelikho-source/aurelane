@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { LayoutDashboard, CreditCard, ClipboardList, Target, LogOut } from 'lucide-react';
+import { LayoutDashboard, CreditCard, ClipboardList, Target, LogOut, BarChart3 } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Transactions', href: '/dashboard/transactions', icon: CreditCard },
   { name: 'Budgets', href: '/dashboard/budgets', icon: ClipboardList },
   { name: 'Goals', href: '/dashboard/goals', icon: Target },
+  { name: 'Charts', href: '/dashboard/charts', icon: BarChart3 },
 ];
 
 export default function Sidebar() {
