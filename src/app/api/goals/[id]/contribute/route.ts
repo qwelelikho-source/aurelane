@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -24,7 +24,8 @@ export async function POST(
       );
     }
 
-    const result = await contributeToGoal(userId, params.id, amountCents);
+    const { id } = await params;
+    const result = await contributeToGoal(userId, id, amountCents);
 
     if (!result.success) {
       if (result.error === 'NOT_FOUND') {

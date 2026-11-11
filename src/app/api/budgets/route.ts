@@ -16,6 +16,9 @@ export async function GET(request: NextRequest) {
   const result = await getBudgets(userId, month);
 
   if (!result.success) {
+    if (result.error === 'INVALID_MONTH') {
+      return NextResponse.json({ error: result.error, fields: { month: result.message } }, { status: 400 });
+    }
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 

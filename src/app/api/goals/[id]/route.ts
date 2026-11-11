@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -13,7 +13,8 @@ export async function GET(
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
   }
 
-  const result = await getGoalById(userId, params.id);
+  const { id } = await params;
+  const result = await getGoalById(userId, id);
 
   if (!result.success) {
     if (result.error === 'NOT_FOUND') {
@@ -30,7 +31,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -41,7 +42,8 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const result = await updateGoal(userId, params.id, body);
+    const { id } = await params;
+    const result = await updateGoal(userId, id, body);
 
     if (!result.success) {
       if (result.error === 'NOT_FOUND') {
@@ -64,7 +66,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -73,7 +75,8 @@ export async function DELETE(
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
   }
 
-  const result = await deleteGoal(userId, params.id);
+  const { id } = await params;
+  const result = await deleteGoal(userId, id);
 
   if (!result.success) {
     if (result.error === 'NOT_FOUND') {

@@ -1,6 +1,7 @@
 import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { monthToDate, getNextMonthStart } from '@/lib/date-utils';
 
 const budgetSchema = z.object({
   category: z.string().trim().min(1).max(50),
@@ -19,12 +20,13 @@ export async function createBudget(userId: string, input: BudgetInput) {
   const { category, monthlyLimitCents, month } = validation.data;
 
   try {
+    const monthDate = monthToDate(month);
     const budget = await prisma.budget.create({
       data: {
         userId,
         category,
         monthlyLimitCents,
-        month,
+        month: monthDate,
       },
     });
     return { success: true, data: budget };
@@ -38,7 +40,11 @@ export async function getBudgets(userId: string, month?: string) {
   try {
     const where: any = { userId };
     if (month) {
-      where.month = month;
+      try {
+        where.month = monthToDate(month);
+      } catch (e) {
+        return { success: false, error: 'INVALID_MONTH', message: (e as Error).message };
+      }
     }
 
     const budgets = await prisma.budget.findMany({
@@ -49,9 +55,9 @@ export async function getBudgets(userId: string, month?: string) {
     // Calculate spent for each budget
     const budgetsWithSpent = await Promise.all(
       budgets.map(async (budget) => {
-        const startDate = new Date(`${budget.month}-01`);
-        const endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + 1);
+        const monthStr = budget.month.toISOString().slice(0, 7);
+        const monthStart = monthToDate(monthStr);
+        const nextMonthStart = getNextMonthStart(monthStr);
 
         const spent = await prisma.transaction.aggregate({
           where: {
@@ -59,8 +65,8 @@ export async function getBudgets(userId: string, month?: string) {
             category: budget.category,
             type: 'EXPENSE',
             date: {
-              gte: startDate,
-              lt: endDate,
+              gte: monthStart,
+              lt: nextMonthStart,
             },
           },
           _sum: {
@@ -74,6 +80,7 @@ export async function getBudgets(userId: string, month?: string) {
 
         return {
           ...budget,
+          month: monthStr,
           spentCents,
           remainingCents,
           percentage: Math.min(percentage, 100),
@@ -102,19 +109,19 @@ export async function getBudgetById(userId: string, id: string) {
       return { success: false, error: 'FORBIDDEN' };
     }
 
-    // Calculate spent
-    const startDate = new Date(`${budget.month}-01`);
-    const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + 1);
+    const monthStr = budget.month.toISOString().slice(0, 7);
+    const monthStart = monthToDate(monthStr);
+    const nextMonthStart = getNextMonthStart(monthStr);
 
+    // Calculate spent
     const spent = await prisma.transaction.aggregate({
       where: {
         userId,
         category: budget.category,
         type: 'EXPENSE',
         date: {
-          gte: startDate,
-          lt: endDate,
+          gte: monthStart,
+          lt: nextMonthStart,
         },
       },
       _sum: {
@@ -130,6 +137,7 @@ export async function getBudgetById(userId: string, id: string) {
       success: true,
       data: {
         ...budget,
+        month: monthStr,
         spentCents,
         remainingCents,
         percentage: Math.min(percentage, 100),
@@ -160,9 +168,14 @@ export async function updateBudget(userId: string, id: string, input: Partial<Bu
       return { success: false, error: 'FORBIDDEN' };
     }
 
+    const updateData: any = { ...validation.data };
+    if (validation.data.month) {
+      updateData.month = monthToDate(validation.data.month);
+    }
+
     const budget = await prisma.budget.update({
       where: { id },
-      data: validation.data,
+      data: updateData,
     });
 
     return { success: true, data: budget };
