@@ -33,3 +33,9 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Privacy mode - blur amounts */
+body.privacy-mode .privacy-sensitive {
+  filter: blur(4px);
+  user-select: none;
+}

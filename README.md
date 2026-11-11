@@ -68,7 +68,7 @@ pnpm prisma migrate deploy
 pnpm prisma db seed
 ```
 
-This creates a demo user with email `demo@aurelane.com` and password `demo123`, along with sample transactions, budgets, and savings goals. Note: All amounts are SAMPLE FIGURES for demonstration purposes only.
+This creates a demo user with email `demo@aurelane.app` and password `demo123`, along with 6 months of realistic sample transactions, budgets, and savings goals. Note: All amounts are SAMPLE FIGURES for demonstration purposes only.
 
 6. Start the development server:
 

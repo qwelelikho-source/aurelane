@@ -11,6 +11,11 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "Aurelane - Private money tracking, in rand",
   description: "Track your finances privately with Aurelane. South African rand (ZAR) support.",
+  openGraph: {
+    title: "Aurelane - Private money tracking, in rand",
+    description: "Track your finances privately with Aurelane. South African rand (ZAR) support.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
