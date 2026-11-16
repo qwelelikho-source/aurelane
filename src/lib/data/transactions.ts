@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { parseRandToCents } from '@/lib/money';
+import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '@/lib/categories';
 
 // This file is server-only
 if (typeof window !== 'undefined') {
@@ -20,6 +21,12 @@ const transactionSchema = z.object({
   category: z.string().min(1).max(50).trim(),
   description: z.string().max(200).trim().nullable().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD format
+}).refine((data) => {
+  const allowedCategories = data.type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  return allowedCategories.includes(data.category);
+}, {
+  message: 'Invalid category for this transaction type',
+  path: ['category'],
 });
 
 export async function createTransaction(userId: string, data: unknown) {

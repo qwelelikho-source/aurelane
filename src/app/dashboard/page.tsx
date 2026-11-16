@@ -3,6 +3,24 @@ import { getMonthlyTotals, getRecentTransactions } from '@/lib/data/transactions
 import { formatZAR } from '@/lib/money';
 import { getCategoryColor } from '@/lib/categories';
 
+function getRelativeDate(date: Date): string {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const transactionDate = new Date(date);
+  const transactionDay = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), transactionDate.getDate());
+
+  if (transactionDay.getTime() === today.getTime()) {
+    return 'Today';
+  }
+  if (transactionDay.getTime() === yesterday.getTime()) {
+    return 'Yesterday';
+  }
+  return transactionDate.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
+}
+
 export default async function DashboardPage() {
   const session = await auth();
   const userId = session?.user?.id;
@@ -32,6 +50,13 @@ export default async function DashboardPage() {
     ? (totals.totalExpenses / totals.totalIncome) * 100
     : 0;
 
+  // Progress bar colour: neutral/gold under 80%, amber 80-100%, red above 100%
+  const progressColor = spentPercentage < 80
+    ? 'bg-[#C9A24B]'
+    : spentPercentage <= 100
+    ? 'bg-[#E6A730]'
+    : 'bg-[#D9746B]';
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
@@ -55,7 +80,7 @@ export default async function DashboardPage() {
         </div>
         <div className="w-full h-2 bg-[#243049] rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#D9746B] transition-all duration-500 ease-out"
+            className={`h-full transition-all duration-500 ease-out ${progressColor}`}
             style={{ width: `${Math.min(spentPercentage, 100)}%` }}
           />
         </div>
@@ -115,11 +140,11 @@ export default async function DashboardPage() {
                   />
                   <div>
                     <p className="text-[#E8E4DA] font-medium text-[14px]">{transaction.category}</p>
-                    <p className="text-sm text-[#8B95A8] text-[13px]">
-                      {transaction.description || 'No description'}
-                    </p>
+                    {transaction.description && (
+                      <p className="text-sm text-[#8B95A8] text-[13px]">{transaction.description}</p>
+                    )}
                     <p className="text-xs text-[#8B95A8] text-[13px]">
-                      {new Date(transaction.date).toLocaleDateString('en-ZA')}
+                      {getRelativeDate(transaction.date)}
                     </p>
                   </div>
                 </div>

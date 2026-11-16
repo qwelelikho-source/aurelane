@@ -3,6 +3,25 @@
 import { useState, useTransition, useEffect } from 'react';
 import { formatZAR } from '@/lib/money';
 import { Trash2, Edit2, Download } from 'lucide-react';
+import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getCategoryColor } from '@/lib/categories';
+
+function getRelativeDate(date: string): string {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const transactionDate = new Date(date);
+  const transactionDay = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), transactionDate.getDate());
+
+  if (transactionDay.getTime() === today.getTime()) {
+    return 'Today';
+  }
+  if (transactionDay.getTime() === yesterday.getTime()) {
+    return 'Yesterday';
+  }
+  return transactionDate.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
+}
 
 interface Transaction {
   id: string;
@@ -23,7 +42,7 @@ export default function TransactionsPage() {
   const [formData, setFormData] = useState({
     type: 'EXPENSE' as 'INCOME' | 'EXPENSE',
     amount: '',
-    category: '',
+    category: EXPENSE_CATEGORIES[0],
     description: '',
     date: new Date().toISOString().split('T')[0],
   });
@@ -66,7 +85,7 @@ export default function TransactionsPage() {
       errors.amount = 'Please enter a valid amount';
     }
 
-    if (!formData.category.trim()) {
+    if (!formData.category) {
       errors.category = 'Category is required';
     }
 
@@ -154,10 +173,11 @@ export default function TransactionsPage() {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
+    const categories = transaction.type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
     setEditFormData({
       type: transaction.type,
       amount: String(transaction.amountCents / 100),
-      category: transaction.category,
+      category: categories.includes(transaction.category) ? transaction.category : categories[0],
       description: transaction.description || '',
       date: transaction.date.slice(0, 10),
     });
@@ -246,34 +266,34 @@ export default function TransactionsPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h1 className="text-3xl font-serif text-text mb-8">Transactions</h1>
+      <h1 className="text-3xl font-serif text-[#E8E4DA] mb-8">Transactions</h1>
 
       {showToast && (
-        <div className="fixed top-4 right-4 bg-positive text-background px-4 py-2 rounded shadow-lg z-50">
+        <div className="fixed top-4 right-4 bg-[#5FB48A] text-[#0B1220] px-4 py-2 rounded shadow-lg z-50">
           {toastMessage}
         </div>
       )}
 
       {error && (
-        <div className="bg-negative/10 border border-negative text-negative px-4 py-3 rounded mb-6">
+        <div className="bg-[#D9746B]/10 border border-[#D9746B] text-[#D9746B] px-4 py-3 rounded mb-6">
           {error}
         </div>
       )}
 
-      <div className="bg-surface border border-border rounded-2xl p-6 mb-8">
-        <h2 className="text-xl font-serif text-text mb-4">Add Transaction</h2>
+      <div className="bg-[#121B2D] border border-[#243049] rounded-2xl p-6 mb-8">
+        <h2 className="text-xl font-serif text-[#E8E4DA] mb-4">Add Transaction</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+              <label htmlFor="type" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                 Type
               </label>
               <select
                 id="type"
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'INCOME' | 'EXPENSE' })}
-                className="w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px]"
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'INCOME' | 'EXPENSE', category: e.target.value === 'INCOME' ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0] })}
+                className="w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] focus:border-transparent transition-all text-[14px]"
               >
                 <option value="EXPENSE">Expense</option>
                 <option value="INCOME">Income</option>
@@ -281,7 +301,7 @@ export default function TransactionsPage() {
             </div>
 
             <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+              <label htmlFor="amount" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                 Amount (R)
               </label>
               <input
@@ -290,33 +310,37 @@ export default function TransactionsPage() {
                 step="0.01"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px] ${
-                  formErrors.amount ? 'border-negative' : 'border-border'
+                className={`w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] focus:border-transparent transition-all text-[14px] ${
+                  formErrors.amount ? 'border-[#D9746B]' : 'border-[#243049]'
                 }`}
                 placeholder="0.00"
               />
-              {formErrors.amount && <p className="text-negative text-sm mt-1 text-[13px]">{formErrors.amount}</p>}
+              {formErrors.amount && <p className="text-[#D9746B] text-sm mt-1 text-[13px]">{formErrors.amount}</p>}
             </div>
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+              <label htmlFor="category" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                 Category
               </label>
-              <input
+              <select
                 id="category"
-                type="text"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px] ${
-                  formErrors.category ? 'border-negative' : 'border-border'
+                className={`w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] focus:border-transparent transition-all text-[14px] ${
+                  formErrors.category ? 'border-[#D9746B]' : 'border-[#243049]'
                 }`}
-                placeholder="e.g., Groceries"
-              />
-              {formErrors.category && <p className="text-negative text-sm mt-1 text-[13px]">{formErrors.category}</p>}
+              >
+                {(formData.type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              {formErrors.category && <p className="text-[#D9746B] text-sm mt-1 text-[13px]">{formErrors.category}</p>}
             </div>
 
             <div>
-              <label htmlFor="date" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+              <label htmlFor="date" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                 Date
               </label>
               <input
@@ -324,16 +348,16 @@ export default function TransactionsPage() {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px] ${
-                  formErrors.date ? 'border-negative' : 'border-border'
+                className={`w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] focus:border-transparent transition-all text-[14px] ${
+                  formErrors.date ? 'border-[#D9746B]' : 'border-[#243049]'
                 }`}
               />
-              {formErrors.date && <p className="text-negative text-sm mt-1 text-[13px]">{formErrors.date}</p>}
+              {formErrors.date && <p className="text-[#D9746B] text-sm mt-1 text-[13px]">{formErrors.date}</p>}
             </div>
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+            <label htmlFor="description" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
               Description (optional)
             </label>
             <input
@@ -341,7 +365,7 @@ export default function TransactionsPage() {
               type="text"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent transition-all text-[14px]"
+              className="w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] focus:border-transparent transition-all text-[14px]"
               placeholder="e.g., Weekly grocery shopping"
             />
           </div>
@@ -349,19 +373,19 @@ export default function TransactionsPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="h-10 bg-gold hover:bg-gold/90 text-background font-medium px-6 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
+            className="h-10 bg-[#C9A24B] hover:bg-[#B8923E] text-[#0B1220] font-medium px-6 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[14px]"
           >
             {isPending ? 'Adding...' : 'Add Transaction'}
           </button>
         </form>
       </div>
 
-      <div className="bg-surface border border-border rounded-2xl p-6">
+      <div className="bg-[#121B2D] border border-[#243049] rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-serif text-text">All Transactions</h2>
+          <h2 className="text-xl font-serif text-[#E8E4DA]">All Transactions</h2>
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 h-10 bg-surface hover:bg-surface/80 text-text font-medium px-4 rounded border border-border transition-colors text-[14px]"
+            className="flex items-center gap-2 h-10 bg-[#121B2D] hover:bg-[#1A263D] text-[#E8E4DA] font-medium px-4 rounded border border-[#243049] transition-colors text-[14px]"
             aria-label="Export transactions"
           >
             <Download className="w-4 h-4" />
@@ -372,32 +396,32 @@ export default function TransactionsPage() {
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 bg-background rounded animate-pulse" />
+              <div key={i} className="h-16 bg-[#0B1220] rounded animate-pulse" />
             ))}
           </div>
         ) : transactions.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted mb-4 text-[14px]">No transactions yet.</p>
-            <p className="text-sm text-muted text-[13px]">
+            <p className="text-[#8B95A8] mb-4 text-[14px]">No transactions yet.</p>
+            <p className="text-sm text-[#8B95A8] text-[13px]">
               Add your first transaction using the form above.
             </p>
           </div>
         ) : (
           <>
             {showEditForm && editingTransaction && (
-              <div className="bg-background border border-border rounded-2xl p-6 mb-6">
-                <h2 className="text-xl font-serif text-text mb-4">Edit Transaction</h2>
+              <div className="bg-[#0B1220] border border-[#243049] rounded-2xl p-6 mb-6">
+                <h2 className="text-xl font-serif text-[#E8E4DA] mb-4">Edit Transaction</h2>
                 <form onSubmit={handleUpdate} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="edit-type" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+                      <label htmlFor="edit-type" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                         Type
                       </label>
                       <select
                         id="edit-type"
                         value={editFormData.type}
-                        onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value as 'INCOME' | 'EXPENSE' })}
-                        className="w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold text-[14px]"
+                        onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value as 'INCOME' | 'EXPENSE', category: e.target.value === 'INCOME' ? INCOME_CATEGORIES[0] : EXPENSE_CATEGORIES[0] })}
+                        className="w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] text-[14px]"
                       >
                         <option value="EXPENSE">Expense</option>
                         <option value="INCOME">Income</option>
@@ -405,7 +429,7 @@ export default function TransactionsPage() {
                     </div>
 
                     <div>
-                      <label htmlFor="edit-amount" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+                      <label htmlFor="edit-amount" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                         Amount (R)
                       </label>
                       <input
@@ -414,33 +438,37 @@ export default function TransactionsPage() {
                         step="0.01"
                         value={editFormData.amount}
                         onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
-                        className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold text-[14px] ${
-                          editFormErrors.amount ? 'border-negative' : 'border-border'
+                        className={`w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] text-[14px] ${
+                          editFormErrors.amount ? 'border-[#D9746B]' : 'border-[#243049]'
                         }`}
                         placeholder="0.00"
                       />
-                      {editFormErrors.amount && <p className="text-negative text-sm mt-1 text-[13px]">{editFormErrors.amount}</p>}
+                      {editFormErrors.amount && <p className="text-[#D9746B] text-sm mt-1 text-[13px]">{editFormErrors.amount}</p>}
                     </div>
 
                     <div>
                       <label htmlFor="edit-category" className="block text-sm font-medium text-muted mb-1 text-[14px]">
                         Category
                       </label>
-                      <input
+                      <select
                         id="edit-category"
-                        type="text"
                         value={editFormData.category}
                         onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
-                        className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold text-[14px] ${
+                        className={`w-full h-10 px-4 py-2 bg-background border rounded text-text focus:outline-none focus:ring-2 focus:ring-gold text-[14px] ${
                           editFormErrors.category ? 'border-negative' : 'border-border'
                         }`}
-                        placeholder="e.g., Groceries"
-                      />
-                      {editFormErrors.category && <p className="text-negative text-sm mt-1 text-[13px]">{editFormErrors.category}</p>}
+                      >
+                        {(editFormData.type === 'INCOME' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                      {editFormErrors.category && <p className="text-[#D9746B] text-sm mt-1 text-[13px]">{editFormErrors.category}</p>}
                     </div>
 
                     <div>
-                      <label htmlFor="edit-date" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+                      <label htmlFor="edit-date" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                         Date
                       </label>
                       <input
@@ -448,16 +476,16 @@ export default function TransactionsPage() {
                         type="date"
                         value={editFormData.date}
                         onChange={(e) => setEditFormData({ ...editFormData, date: e.target.value })}
-                        className={`w-full h-10 px-4 py-2 bg-background border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold text-[14px] ${
-                          editFormErrors.date ? 'border-negative' : 'border-border'
+                        className={`w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] text-[14px] ${
+                          editFormErrors.date ? 'border-[#D9746B]' : 'border-[#243049]'
                         }`}
                       />
-                      {editFormErrors.date && <p className="text-negative text-sm mt-1 text-[13px]">{editFormErrors.date}</p>}
+                      {editFormErrors.date && <p className="text-[#D9746B] text-sm mt-1 text-[13px]">{editFormErrors.date}</p>}
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="edit-description" className="block text-sm font-medium text-muted mb-1 text-[14px]">
+                    <label htmlFor="edit-description" className="block text-sm font-medium text-[#8B95A8] mb-1 text-[14px]">
                       Description (optional)
                     </label>
                     <input
@@ -465,7 +493,7 @@ export default function TransactionsPage() {
                       type="text"
                       value={editFormData.description}
                       onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                      className="w-full h-10 px-4 py-2 bg-background border border-border rounded text-text placeholder-muted focus:outline-none focus:ring-2 focus:ring-gold text-[14px]"
+                      className="w-full h-10 px-4 py-2 bg-[#0B1220] border border-[#243049] rounded text-[#E8E4DA] placeholder-[#8B95A8] focus:outline-none focus:ring-2 focus:ring-[#C9A24B] text-[14px]"
                       placeholder="e.g., Weekly grocery shopping"
                     />
                   </div>
@@ -474,7 +502,7 @@ export default function TransactionsPage() {
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="h-10 bg-gold hover:bg-gold/90 text-background font-medium px-6 rounded transition-colors disabled:opacity-50 text-[14px]"
+                      className="h-10 bg-[#C9A24B] hover:bg-[#B8923E] text-[#0B1220] font-medium px-6 rounded transition-colors disabled:opacity-50 text-[14px]"
                     >
                       {isPending ? 'Updating...' : 'Update'}
                     </button>
@@ -484,7 +512,7 @@ export default function TransactionsPage() {
                         setShowEditForm(false);
                         setEditingTransaction(null);
                       }}
-                      className="h-10 bg-background hover:bg-background/80 text-text font-medium px-6 rounded border border-border transition-colors text-[14px]"
+                      className="h-10 bg-[#121B2D] hover:bg-[#1A263D] text-[#E8E4DA] font-medium px-6 rounded border border-[#243049] transition-colors text-[14px]"
                     >
                       Cancel
                     </button>
@@ -493,29 +521,35 @@ export default function TransactionsPage() {
               </div>
             )}
 
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-[#243049]">
               {transactions.map((transaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between py-4"
                 >
-                  <div className="flex-1">
-                    <p className="text-text font-medium text-[14px]">{transaction.category}</p>
-                    <p className="text-sm text-muted text-[13px]">
-                      {transaction.description || 'No description'}
-                    </p>
-                    <p className="text-xs text-muted text-[13px]">
-                      {new Date(transaction.date).toLocaleDateString('en-ZA')}
-                    </p>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div
+                      className="w-3 h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: getCategoryColor(transaction.category) }}
+                    />
+                    <div>
+                      <p className="text-[#E8E4DA] font-medium text-[14px]">{transaction.category}</p>
+                      {transaction.description && (
+                        <p className="text-sm text-[#8B95A8] text-[13px]">{transaction.description}</p>
+                      )}
+                      <p className="text-xs text-[#8B95A8] text-[13px]">
+                        {getRelativeDate(transaction.date)}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <p
                       className={`text-lg font-medium tabular-nums ${
                         transaction.type === 'INCOME' && transaction.amountCents > 0
-                          ? 'text-positive'
+                          ? 'text-[#5FB48A]'
                           : transaction.type === 'EXPENSE' && transaction.amountCents > 0
-                          ? 'text-negative'
-                          : 'text-text'
+                          ? 'text-[#D9746B]'
+                          : 'text-[#E8E4DA]'
                       }`}
                     >
                       {transaction.type === 'INCOME' ? '+' : '-'}
@@ -523,7 +557,7 @@ export default function TransactionsPage() {
                     </p>
                     <button
                       onClick={() => handleEdit(transaction)}
-                      className="text-muted hover:text-text transition-colors disabled:opacity-50"
+                      className="text-[#8B95A8] hover:text-[#E8E4DA] transition-colors disabled:opacity-50"
                       disabled={isPending}
                       aria-label="Edit transaction"
                     >
@@ -531,7 +565,7 @@ export default function TransactionsPage() {
                     </button>
                     <button
                       onClick={() => handleDelete(transaction.id)}
-                      className="text-muted hover:text-negative transition-colors disabled:opacity-50"
+                      className="text-[#8B95A8] hover:text-[#D9746B] transition-colors disabled:opacity-50"
                       disabled={isPending}
                       aria-label="Delete transaction"
                     >

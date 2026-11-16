@@ -19,7 +19,6 @@ export default async function DashboardLayout({
       <Sidebar />
       <main className="flex-1 overflow-x-hidden">
         <header className="bg-[#121B2D] border-b border-[#243049] px-8 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-serif text-[#E8E4DA]">Aurelane</h1>
           <PrivacyToggle />
         </header>
         <div className="p-8 pb-24 md:pb-8">{children}</div>
