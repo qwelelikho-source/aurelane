@@ -4,6 +4,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
   DIRECT_URL: z.string().url('DIRECT_URL must be a valid URL'),
   AUTH_SECRET: z.string().min(1, 'AUTH_SECRET is required'),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  AI_MODEL: z.string().optional(),
 });
 
 // Validate environment variables at server startup

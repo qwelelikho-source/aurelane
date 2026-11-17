@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { getMonthlyTotals, getRecentTransactions } from '@/lib/data/transactions';
 import { formatZAR } from '@/lib/money';
 import { getCategoryColor } from '@/lib/categories';
+import { InsightsCard } from '@/components/InsightsCard';
 
 function getRelativeDate(date: Date): string {
   const now = new Date();
@@ -110,6 +111,11 @@ export default async function DashboardPage() {
             {formatZAR(totals.totalExpenses)}
           </p>
         </div>
+      </div>
+
+      {/* Insights Card */}
+      <div className="mb-8">
+        <InsightsCard />
       </div>
 
       {/* Recent Transactions */}

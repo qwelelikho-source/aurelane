@@ -110,6 +110,22 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **Filters**: URL-based filtering by month, custom date range, category, and transaction type
 - **CSV Export**: Export transactions to CSV with proper escaping, formula injection guard, and UTF-8 BOM for Excel compatibility
 
+### AI Insights (Optional)
+- **Aurelane Insights**: AI-powered financial coach that analyzes your spending patterns
+- Rules Engine: Analyzes monthly savings rate, budget status, projected spend, and month-over-month comparisons
+- AI Layer: Uses Anthropic Claude to provide personalized insights (requires ANTHROPIC_API_KEY)
+- **Consent-Based**: AI insights are opt-in; users can enable/disable in settings
+- **Caching**: Insights are cached per user per month to reduce API calls
+- **Rate Limiting**: 10 AI requests per hour per user to control costs
+- **Disclaimer**: General information based on recorded transactions, not financial advice
+- **Fallback**: Uses rules-engine insights when AI is disabled or unavailable
+
+To enable AI insights, add your Anthropic API key to `.env`:
+```
+ANTHROPIC_API_KEY="your-api-key-here"
+AI_MODEL="claude-haiku-5-5"
+```
+
 ## Security
 
 - All monetary values are stored as integer cents (R25.50 = 2550) to avoid floating-point precision issues

@@ -17,6 +17,8 @@ model User {
   transactions Transaction[]
   budgets      Budget[]
   savingsGoals SavingsGoal[]
+  insights     Insight[]
+  aiEnabled    Boolean       @default(false)
 }
 
 model Transaction {
@@ -54,6 +56,20 @@ model SavingsGoal {
   targetDate  DateTime?
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Insight {
+  id           String   @id @default(cuid())
+  userId       String
+  month        DateTime
+  status       String
+  headline     String
+  observations String
+  suggestion   String
+  generatedAt  DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
 }
 
 enum TransactionType {

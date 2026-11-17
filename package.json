@@ -19,6 +19,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^1.69.0",
