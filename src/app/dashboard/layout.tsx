@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { PrivacyToggle } from '@/components/PrivacyToggle';
+import { ChatPanel } from '@/components/ChatPanel';
 
 export default async function DashboardLayout({
   children,
@@ -23,6 +24,7 @@ export default async function DashboardLayout({
         </header>
         <div className="p-8 pb-24 md:pb-8">{children}</div>
       </main>
+      <ChatPanel />
     </div>
   );
 }
